@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Whack A Mole!</title>
+  <link href='https://fonts.googleapis.com/css?family=Amatic+SC:400,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+
+  <h1>Whack-a-mole! <span class="score">0</span></h1>
+  <h2>Highest Score: <span class="highest-score">0</span></h2>
+  <div class="start">
+    <button onClick="startGame()">Start!</button>
+  </div>
+
+  <div class="game">
+    <div class="hole hole1">
+      <div class="mole"></div>
+    </div>
+    <div class="hole hole2">
+      <div class="mole"></div>
+    </div>
+    <div class="hole hole3">
+      <div class="mole"></div>
+    </div>
+    <div class="hole hole4">
+      <div class="mole"></div>
+    </div>
+    <div class="hole hole5">
+      <div class="mole"></div>
+    </div>
+    <div class="hole hole6">
+      <div class="mole"></div>
+    </div>
+  </div>
+
+  <script>
+    const holes = document.querySelectorAll('.hole');
+    const scoreBoard = document.querySelector('.score');
+    const highest = document.querySelector('.highest-score')
+    const moles = document.querySelectorAll('.mole');
+    let lastHole;
+    let timeUp = false;
+    let score = 0;
+    const highestScore = parseInt(localStorage.getItem('score')) || 0;
+    highestScore > parseInt(highest.textContent) ? highest.textContent = highestScore : '';
+
+
+    const randomTime = (max, min) => Math.round(Math.random() * (max - min) + min);
+
+    const randomHole = (holes) => {
+      const idx = Math.floor(Math.random() * holes.length);
+      const hole = holes[idx]
+      if (lastHole === hole) {
+        console.log('Its the same that before')
+        return randomHole(holes);
+      }
+      lastHole = hole;
+      return hole;
+    }
+
+    const peep = () => {
+      const time = randomTime(200, 1000);
+      const hole = randomHole(holes);
+      hole.classList.add('up')
+      setTimeout(() => {
+        hole.classList.remove('up')
+        !timeUp && peep();
+      }, time);
+    }
+
+    const startGame = () => {
+      scoreBoard.textContent = 0;
+      timeUp = false;
+      score = 0;
+      peep();
+      setTimeout(() => {
+        timeUp = true
+        if (score > highestScore) {
+          localStorage.setItem('score', score)
+          highest.textContent = score;
+        }
+      }, 10000);
+    }
+
+    const bonk = e => {
+      if (!e.isTrusted) return;
+      score += 1;
+      e.target.classList.remove('up')
+      scoreBoard.textContent = score;
+
+    }
+
+    moles.forEach(mole => mole.addEventListener('click', bonk))
+  </script>
+</body>
+
+</html>
